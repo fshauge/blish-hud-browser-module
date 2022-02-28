@@ -73,6 +73,7 @@ namespace BrowserModule
             {
                 _renderer.Update();
                 _renderer.Render();
+                return;
             }
 
             // TODO: Use surface.GetDirtyRegion() to only update texture when the surface has changed
