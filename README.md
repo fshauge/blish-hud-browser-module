@@ -1,0 +1,1 @@
+# blish-hud-browser-module
