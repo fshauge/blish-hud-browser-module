@@ -69,7 +69,7 @@ namespace BrowserModule
 
         protected override unsafe void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
-            while (_loading)
+            if (_loading)
             {
                 _renderer.Update();
                 _renderer.Render();
