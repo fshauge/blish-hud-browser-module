@@ -1,1 +1,1 @@
-# blish-hud-browser-module
+# Blish HUD Wiki Module
