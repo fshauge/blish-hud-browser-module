@@ -95,14 +95,18 @@ namespace BrowserModule
             _renderer.Update();
             _renderer.Render();
 
-            // TODO: Use surface.GetDirtyRegion() to only update texture when the surface has changed
-
             var surface = _view.GetSurface();
-            var bitmap = surface.GetBitmap();
-            var pixels = bitmap.LockPixels();
-            Marshal.Copy(pixels, _pixels, 0, _pixels.Length);
-            bitmap.UnlockPixels();
-            _texture.SetData(_pixels);
+
+            if (!surface.GetDirtyBounds().IsEmpty())
+            {
+                var bitmap = surface.GetBitmap();
+                var pixels = bitmap.LockPixels();
+                Marshal.Copy(pixels, _pixels, 0, _pixels.Length);
+                bitmap.UnlockPixels();
+                _texture.SetData(_pixels);
+                surface.ClearDirtyBounds();
+            }
+
             spriteBatch.DrawOnCtrl(this, _texture, bounds);
         }
 
