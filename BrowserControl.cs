@@ -87,6 +87,7 @@ namespace BrowserModule
                 _renderer = new Renderer(_config);
                 _view = new View(_renderer, (uint)bounds.Width, (uint)bounds.Height, false, new Session(null));
                 _view.LoadUrl(Url);
+                _view.Focus();
                 _pixels = new int[bounds.Width * bounds.Height];
                 _texture = new Texture2D(spriteBatch.GraphicsDevice, bounds.Width, bounds.Height, false, SurfaceFormat.Bgra32);
                 _initialized = true;
