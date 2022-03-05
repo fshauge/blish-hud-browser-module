@@ -9,6 +9,7 @@ namespace BrowserModule
         {
             var browser = new BrowserControl()
             {
+                Parent = buildPanel,
                 Size = buildPanel.Size,
                 Url = "https://wiki.guildwars2.com/wiki/Main_Page"
             };
