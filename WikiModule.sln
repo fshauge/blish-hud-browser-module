@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrowserModule", "BrowserModule.csproj", "{70FEAA17-9BD5-4CF2-854F-EF95AF0ECC4D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WikiModule", "WikiModule.csproj", "{70FEAA17-9BD5-4CF2-854F-EF95AF0ECC4D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

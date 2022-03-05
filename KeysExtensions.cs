@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Microsoft.Xna.Framework.Input;
 
-namespace BrowserModule
+namespace WikiModule
 {
     public static unsafe class KeysExtensions
     {

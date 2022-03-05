@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{70FEAA17-9BD5-4CF2-854F-EF95AF0ECC4D}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>BrowserModule</RootNamespace>
-    <AssemblyName>BrowserModule</AssemblyName>
+    <RootNamespace>WikiModule</RootNamespace>
+    <AssemblyName>WikiModule</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -67,9 +67,9 @@
     <None Include="resources\cacert.pem" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BrowserModule.cs" />
+    <Compile Include="WikiModule.cs" />
     <Compile Include="BrowserControl.cs" />
-    <Compile Include="BrowserView.cs" />
+    <Compile Include="WikiView.cs" />
     <Compile Include="KeysExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

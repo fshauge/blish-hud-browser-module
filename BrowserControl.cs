@@ -11,7 +11,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using MouseEventType = ImpromptuNinjas.UltralightSharp.Enums.MouseEventType;
 
-namespace BrowserModule
+namespace WikiModule
 {
     public unsafe class BrowserControl : Control
     {

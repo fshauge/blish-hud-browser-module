@@ -1,9 +1,9 @@
 ﻿using Blish_HUD.Controls;
 using Blish_HUD.Graphics.UI;
 
-namespace BrowserModule
+namespace WikiModule
 {
-    public class BrowserView : View
+    public class WikiView : View
     {
         protected override void Build(Container buildPanel)
         {

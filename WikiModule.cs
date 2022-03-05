@@ -11,12 +11,12 @@ using Ultralight = ImpromptuNinjas.UltralightSharp.Safe.Ultralight;
 using UltralightLogger = ImpromptuNinjas.UltralightSharp.Safe.Logger;
 using UltralightLogLevel = ImpromptuNinjas.UltralightSharp.Enums.LogLevel;
 
-namespace BrowserModule
+namespace WikiModule
 {
     [Export(typeof(Module))]
-    public class BrowserModule : Module
+    public class WikiModule : Module
     {
-        private static readonly Logger Logger = Logger.GetLogger<BrowserModule>();
+        private static readonly Logger Logger = Logger.GetLogger<WikiModule>();
 
         #region Service Managers
         internal SettingsManager SettingsManager => ModuleParameters.SettingsManager;
@@ -25,10 +25,11 @@ namespace BrowserModule
         internal Gw2ApiManager Gw2ApiManager => ModuleParameters.Gw2ApiManager;
         #endregion
 
-        private WindowTab _browserTab;
+        private WikiView _wikiView;
+        private WindowTab _wikiTab;
 
         [ImportingConstructor]
-        public BrowserModule([Import("ModuleParameters")] ModuleParameters moduleParameters) : base(moduleParameters) { }
+        public WikiModule([Import("ModuleParameters")] ModuleParameters moduleParameters) : base(moduleParameters) { }
 
         protected override void Initialize()
         {
@@ -51,8 +52,9 @@ namespace BrowserModule
                 }
             });
 
-            _browserTab = new WindowTab("Browser", new AsyncTexture2D());
-            GameService.Overlay.BlishHudWindow.AddTab(_browserTab, () => new BrowserView());
+            _wikiView = new WikiView();
+            _wikiTab = new WindowTab("Wiki", new AsyncTexture2D());
+            GameService.Overlay.BlishHudWindow.AddTab(_wikiTab, () => _wikiView);
         }
 
         protected override Task LoadAsync()
@@ -71,7 +73,7 @@ namespace BrowserModule
 
         protected override void Unload()
         {
-            GameService.Overlay.BlishHudWindow.RemoveTab(_browserTab);
+            GameService.Overlay.BlishHudWindow.RemoveTab(_wikiTab);
         }
     }
 }
