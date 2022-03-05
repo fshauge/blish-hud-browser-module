@@ -1,4 +1,4 @@
-using Blish_HUD;
+﻿using Blish_HUD;
 using Blish_HUD.Controls;
 using Blish_HUD.Input;
 using ImpromptuNinjas.UltralightSharp.Enums;
@@ -16,6 +16,7 @@ namespace BrowserModule
     public unsafe class BrowserControl : Control
     {
         private static readonly MouseHandler Mouse = GameService.Input.Mouse;
+        private static readonly KeyboardHandler Keyboard = GameService.Input.Keyboard;
 
         public string Url { get; set; }
 
@@ -48,6 +49,8 @@ namespace BrowserModule
             Mouse.LeftMouseButtonReleased += OnLeftMouseButtonReleased;
             Mouse.MouseMoved += OnMouseMoved;
             Mouse.MouseWheelScrolled += OnMouseWheelScrolled;
+            Keyboard.KeyPressed += OnKeyPressed;
+            Keyboard.KeyReleased += OnKeyReleased;
         }
 
         private void OnLeftMouseButtonPressed(object sender, MouseEventArgs e)
@@ -78,6 +81,17 @@ namespace BrowserModule
             var deltaX = Mouse.State.HorizontalScrollWheelValue;
             var deltaY = Mouse.State.ScrollWheelValue;
             _view?.FireScrollEvent(new ScrollEvent(ScrollEventType.ScrollByPixel, deltaX, deltaY));
+        }
+
+        private void OnKeyPressed(object sender, KeyboardEventArgs e)
+        {
+            _view?.FireKeyEvent(new KeyEvent(KeyEventType.RawKeyDown, (UIntPtr)e.Key, IntPtr.Zero, false));
+            _view?.FireKeyEvent(new KeyEvent(KeyEventType.Char, (UIntPtr)e.Key.ToChar(), IntPtr.Zero, false));
+        }
+
+        private void OnKeyReleased(object sender, KeyboardEventArgs e)
+        {
+            _view?.FireKeyEvent(new KeyEvent(KeyEventType.KeyUp, (UIntPtr)e.Key, IntPtr.Zero, false));
         }
 
         protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
@@ -123,6 +137,8 @@ namespace BrowserModule
             Mouse.LeftMouseButtonReleased -= OnLeftMouseButtonReleased;
             Mouse.MouseMoved -= OnMouseMoved;
             Mouse.MouseWheelScrolled -= OnMouseWheelScrolled;
+            Keyboard.KeyPressed -= OnKeyPressed;
+            Keyboard.KeyReleased -= OnKeyReleased;
 
             _config.Dispose();
             base.DisposeControl();

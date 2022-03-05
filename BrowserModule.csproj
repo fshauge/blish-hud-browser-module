@@ -70,6 +70,7 @@
     <Compile Include="BrowserModule.cs" />
     <Compile Include="BrowserControl.cs" />
     <Compile Include="BrowserView.cs" />
+    <Compile Include="KeysExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AsyncClipboardService, Version=1.7.1.0, Culture=neutral, processorArchitecture=MSIL">
