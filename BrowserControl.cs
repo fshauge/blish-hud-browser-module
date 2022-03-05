@@ -1,5 +1,7 @@
-﻿using Blish_HUD;
+using Blish_HUD;
 using Blish_HUD.Controls;
+using Blish_HUD.Input;
+using ImpromptuNinjas.UltralightSharp.Enums;
 using ImpromptuNinjas.UltralightSharp.Safe;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -7,11 +9,14 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using MouseEventType = ImpromptuNinjas.UltralightSharp.Enums.MouseEventType;
 
 namespace BrowserModule
 {
-    public class BrowserControl : Control
+    public unsafe class BrowserControl : Control
     {
+        private static readonly MouseHandler Mouse = GameService.Input.Mouse;
+
         public string Url { get; set; }
 
         private Config _config;
@@ -38,9 +43,44 @@ namespace BrowserModule
             _config.SetEnableJavaScript(true);
 
             _initialized = false;
+
+            Mouse.LeftMouseButtonPressed += OnLeftMouseButtonPressed;
+            Mouse.LeftMouseButtonReleased += OnLeftMouseButtonReleased;
+            Mouse.MouseMoved += OnMouseMoved;
+            Mouse.MouseWheelScrolled += OnMouseWheelScrolled;
         }
 
-        protected override unsafe void Paint(SpriteBatch spriteBatch, Rectangle bounds)
+        private void OnLeftMouseButtonPressed(object sender, MouseEventArgs e)
+        {
+            var mousePosition = Mouse.Position - AbsoluteBounds.Location;
+            _view?.FireMouseEvent(new MouseEvent(MouseEventType.MouseDown, mousePosition.X, mousePosition.Y, MouseButton.Left));
+        }
+
+        private void OnLeftMouseButtonReleased(object sender, MouseEventArgs e)
+        {
+            var mousePosition = Mouse.Position - AbsoluteBounds.Location;
+            _view?.FireMouseEvent(new MouseEvent(MouseEventType.MouseUp, mousePosition.X, mousePosition.Y, MouseButton.Left));
+        }
+
+        private void OnMouseMoved(object sender, MouseEventArgs e)
+        {
+            var mousePosition = Mouse.Position - AbsoluteBounds.Location;
+            _view?.FireMouseEvent(new MouseEvent(MouseEventType.MouseMoved, mousePosition.X, mousePosition.Y, MouseButton.None));
+        }
+
+        private void OnMouseWheelScrolled(object sender, MouseEventArgs e)
+        {
+            if (!AbsoluteBounds.Contains(Mouse.Position))
+            {
+                return;
+            }
+
+            var deltaX = Mouse.State.HorizontalScrollWheelValue;
+            var deltaY = Mouse.State.ScrollWheelValue;
+            _view?.FireScrollEvent(new ScrollEvent(ScrollEventType.ScrollByPixel, deltaX, deltaY));
+        }
+
+        protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
         {
             if (!_initialized)
             {
@@ -68,8 +108,17 @@ namespace BrowserModule
 
         protected override void DisposeControl()
         {
-            _view.Dispose();
-            _renderer.Dispose();
+            if (_initialized)
+            {
+                _view.Dispose();
+                _renderer.Dispose();
+            }
+
+            Mouse.LeftMouseButtonPressed -= OnLeftMouseButtonPressed;
+            Mouse.LeftMouseButtonReleased -= OnLeftMouseButtonReleased;
+            Mouse.MouseMoved -= OnMouseMoved;
+            Mouse.MouseWheelScrolled -= OnMouseWheelScrolled;
+
             _config.Dispose();
             base.DisposeControl();
         }
