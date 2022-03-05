@@ -64,7 +64,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <None Include="resources\cacert.pem" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="WikiModule.cs" />

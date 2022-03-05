@@ -6,8 +6,6 @@ using ImpromptuNinjas.UltralightSharp.Safe;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
-using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
 using MouseEventType = ImpromptuNinjas.UltralightSharp.Enums.MouseEventType;
 
@@ -19,8 +17,8 @@ namespace WikiModule
         private static readonly KeyboardHandler Keyboard = GameService.Input.Keyboard;
 
         public string Url { get; set; }
+        public Config Config { get; set; }
 
-        private Config _config;
         private bool _initialized;
         private Renderer _renderer;
         private View _view;
@@ -29,22 +27,6 @@ namespace WikiModule
 
         public BrowserControl()
         {
-            AppCore.EnablePlatformFontLoader();
-
-            var mainDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            var resourcePath = Path.Combine(mainDirectory, "resources");
-            var tmpDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            var cachePath = Path.Combine(tmpDirectory, "cache");
-
-            _config = new Config();
-            _config.SetResourcePath(resourcePath);
-            _config.SetCachePath(cachePath);
-            _config.SetUseGpuRenderer(false);
-            _config.SetEnableImages(true);
-            _config.SetEnableJavaScript(true);
-
-            _initialized = false;
-
             Mouse.LeftMouseButtonPressed += OnLeftMouseButtonPressed;
             Mouse.LeftMouseButtonReleased += OnLeftMouseButtonReleased;
             Mouse.MouseMoved += OnMouseMoved;
@@ -98,7 +80,7 @@ namespace WikiModule
         {
             if (!_initialized)
             {
-                _renderer = new Renderer(_config);
+                _renderer = new Renderer(Config);
                 _view = new View(_renderer, (uint)bounds.Width, (uint)bounds.Height, false, new Session(null));
                 _view.LoadUrl(Url);
                 _view.Focus();
@@ -129,8 +111,10 @@ namespace WikiModule
         {
             if (_initialized)
             {
+                _texture.Dispose();
                 _view.Dispose();
                 _renderer.Dispose();
+                _initialized = false;
             }
 
             Mouse.LeftMouseButtonPressed -= OnLeftMouseButtonPressed;
@@ -140,7 +124,6 @@ namespace WikiModule
             Keyboard.KeyPressed -= OnKeyPressed;
             Keyboard.KeyReleased -= OnKeyReleased;
 
-            _config.Dispose();
             base.DisposeControl();
         }
     }

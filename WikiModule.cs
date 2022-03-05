@@ -6,8 +6,12 @@ using Blish_HUD.Modules.Managers;
 using Microsoft.Xna.Framework;
 using System;
 using System.ComponentModel.Composition;
+using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using Ultralight = ImpromptuNinjas.UltralightSharp.Safe.Ultralight;
+using UltralightAppCore = ImpromptuNinjas.UltralightSharp.Safe.AppCore;
+using UltralightConfig = ImpromptuNinjas.UltralightSharp.Safe.Config;
 using UltralightLogger = ImpromptuNinjas.UltralightSharp.Safe.Logger;
 using UltralightLogLevel = ImpromptuNinjas.UltralightSharp.Enums.LogLevel;
 
@@ -25,7 +29,7 @@ namespace WikiModule
         internal Gw2ApiManager Gw2ApiManager => ModuleParameters.Gw2ApiManager;
         #endregion
 
-        private WikiView _wikiView;
+        private UltralightConfig _config;
         private WindowTab _wikiTab;
 
         [ImportingConstructor]
@@ -52,9 +56,22 @@ namespace WikiModule
                 }
             });
 
-            _wikiView = new WikiView();
+            UltralightAppCore.EnablePlatformFontLoader();
+
+            var mainDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            var resourcePath = Path.Combine(mainDirectory, "resources");
+            var tmpDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+            var cachePath = Path.Combine(tmpDirectory, "cache");
+
+            _config = new UltralightConfig();
+            _config.SetResourcePath(resourcePath);
+            _config.SetCachePath(cachePath);
+            _config.SetUseGpuRenderer(false);
+            _config.SetEnableImages(true);
+            _config.SetEnableJavaScript(true);
+
             _wikiTab = new WindowTab("Wiki", new AsyncTexture2D());
-            GameService.Overlay.BlishHudWindow.AddTab(_wikiTab, () => _wikiView);
+            GameService.Overlay.BlishHudWindow.AddTab(_wikiTab, () => new WikiView(_config));
         }
 
         protected override Task LoadAsync()
@@ -74,6 +91,7 @@ namespace WikiModule
         protected override void Unload()
         {
             GameService.Overlay.BlishHudWindow.RemoveTab(_wikiTab);
+            _config.Dispose();
         }
     }
 }
