@@ -64,9 +64,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <None Include="ref\resources\cacert.pem" />
+    <None Include="ref\resources\icudt67l.dat" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Browser.cs" />
+    <Compile Include="Kernel32.cs" />
     <Compile Include="WikiModule.cs" />
     <Compile Include="BrowserControl.cs" />
     <Compile Include="WikiView.cs" />
@@ -278,13 +281,16 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ref\_instructions.txt" />
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="ref\lib\AppCore.dll" />
+    <None Include="ref\lib\Ultralight.dll" />
+    <None Include="ref\lib\UltralightCore.dll" />
+    <None Include="ref\lib\WebCore.dll" />
+    <Content Include="ref\textures\748852463700017253.png" />
     <Content Include="UltralightEula.txt" />
     <Content Include="UltralightLicense.txt" />
     <Content Include="UltralightNotices.txt" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>

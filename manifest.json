@@ -15,5 +15,5 @@
             "name": "direct"
         }
     ],
-    "directories": [ "cache" ]
+    "directories": [ "ultralight" ]
 }

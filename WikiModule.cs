@@ -1,13 +1,12 @@
 ﻿using Blish_HUD;
-using Blish_HUD.Content;
 using Blish_HUD.Controls;
 using Blish_HUD.Modules;
 using Blish_HUD.Modules.Managers;
 using Microsoft.Xna.Framework;
 using System;
 using System.ComponentModel.Composition;
-using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace WikiModule
@@ -31,13 +30,17 @@ namespace WikiModule
 
         protected override void Initialize()
         {
-            var mainDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            var resourcePath = Path.Combine(mainDirectory, "resources");
-            var cachePath = DirectoriesManager.GetFullDirectoryPath("cache");
+            var ultralightPath = DirectoriesManager.GetFullDirectoryPath("ultralight");
+            var resourcePath = Path.Combine(ultralightPath, "resources");
+            var cachePath = Path.Combine(ultralightPath, "cache");
+            var libPath = Path.Combine(ultralightPath, "lib");
+
+            ExtractUltralight(ultralightPath);
+            LoadUltralight(libPath);
 
             Browser.Initialize(resourcePath, cachePath);
 
-            _wikiTab = new WindowTab("Wiki", ContentsManager.GetTexture("748852463700017253.png"));
+            _wikiTab = new WindowTab("Wiki", ContentsManager.GetTexture("textures/748852463700017253.png"));
             GameService.Overlay.BlishHudWindow.AddTab(_wikiTab, () => new WikiView());
         }
 
@@ -58,6 +61,50 @@ namespace WikiModule
         protected override void Unload()
         {
             GameService.Overlay.BlishHudWindow.RemoveTab(_wikiTab);
+        }
+
+        private void LoadUltralight(string libPath)
+        {
+            Kernel32.SetDllDirectory(libPath);
+
+            if (Directory.Exists(libPath))
+            {
+                foreach (var library in Directory.EnumerateFiles(libPath, "*.dll"))
+                {
+                    if (Kernel32.LoadLibrary(library) == IntPtr.Zero)
+                    {
+                        throw Marshal.GetExceptionForHR(Marshal.GetLastWin32Error());
+                    }
+                }
+            }
+        }
+
+        private void ExtractUltralight(string path)
+        {
+            ExtractFile("lib/AppCore.dll", path);
+            ExtractFile("lib/Ultralight.dll", path);
+            ExtractFile("lib/UltralightCore.dll", path);
+            ExtractFile("lib/WebCore.dll", path);
+            ExtractFile("resources/cacert.pem", path);
+            ExtractFile("resources/icudt67l.dat", path);
+        }
+
+        private void ExtractFile(string file, string output)
+        {
+            var path = Path.Combine(output, file);
+            Directory.CreateDirectory(Path.GetDirectoryName(path));
+
+            if (File.Exists(path))
+            {
+                // TODO: Check if hash matches
+                return;
+            }
+
+            using (var stream = ContentsManager.GetFileStream(file))
+            using (var fileStream = new FileStream(path, FileMode.Create))
+            {
+                stream.CopyTo(fileStream);
+            }
         }
     }
 }

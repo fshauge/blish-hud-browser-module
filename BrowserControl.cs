@@ -3,7 +3,6 @@ using Blish_HUD.Controls;
 using Blish_HUD.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Runtime.InteropServices;
 
 namespace WikiModule
