@@ -1,9 +1,8 @@
 ﻿using System.Runtime.InteropServices;
-using Microsoft.Xna.Framework.Input;
 
 namespace WikiModule
 {
-    public static unsafe class KeysExtensions
+    public static unsafe class Keyboard
     {
         [DllImport("user32.dll", EntryPoint = "GetKeyboardState", SetLastError = true)]
         private static extern bool GetKeyboardState(byte* lpKeyState);
@@ -14,12 +13,11 @@ namespace WikiModule
         [DllImport("user32.dll", EntryPoint = "ToAscii", SetLastError = true)]
         private static extern int ToAscii(uint uVirtKey, uint uScanCode, byte* lpKeyState, out char lpchar, uint uFlags);
 
-        public static char ToChar(this Keys key)
+        public static bool TryGetChar(uint key, out char ch)
         {
             var kbs = stackalloc byte[256];
             GetKeyboardState(kbs);
-            ToAscii((uint)key, MapVirtualKey((uint)key, 0), kbs, out var ch, 0);
-            return ch;
+            return ToAscii(key, MapVirtualKey(key, 0), kbs, out ch, 0) > 0;
         }
     }
 }

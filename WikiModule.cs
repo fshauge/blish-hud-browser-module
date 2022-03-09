@@ -9,11 +9,6 @@ using System.ComponentModel.Composition;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
-using Ultralight = ImpromptuNinjas.UltralightSharp.Safe.Ultralight;
-using UltralightAppCore = ImpromptuNinjas.UltralightSharp.Safe.AppCore;
-using UltralightConfig = ImpromptuNinjas.UltralightSharp.Safe.Config;
-using UltralightLogger = ImpromptuNinjas.UltralightSharp.Safe.Logger;
-using UltralightLogLevel = ImpromptuNinjas.UltralightSharp.Enums.LogLevel;
 
 namespace WikiModule
 {
@@ -29,7 +24,6 @@ namespace WikiModule
         internal Gw2ApiManager Gw2ApiManager => ModuleParameters.Gw2ApiManager;
         #endregion
 
-        private UltralightConfig _config;
         private WindowTab _wikiTab;
 
         [ImportingConstructor]
@@ -37,41 +31,14 @@ namespace WikiModule
 
         protected override void Initialize()
         {
-            Ultralight.SetLogger(new UltralightLogger
-            {
-                LogMessage = (level, msg) =>
-                {
-                    switch (level)
-                    {
-                        case UltralightLogLevel.Info:
-                            Logger.Info(msg);
-                            break;
-                        case UltralightLogLevel.Warning:
-                            Logger.Warn(msg);
-                            break;
-                        case UltralightLogLevel.Error:
-                            Logger.Error(msg);
-                            break;
-                    }
-                }
-            });
-
-            UltralightAppCore.EnablePlatformFontLoader();
-
             var mainDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             var resourcePath = Path.Combine(mainDirectory, "resources");
-            var tmpDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
-            var cachePath = Path.Combine(tmpDirectory, "cache");
+            var cachePath = DirectoriesManager.GetFullDirectoryPath("cache");
 
-            _config = new UltralightConfig();
-            _config.SetResourcePath(resourcePath);
-            _config.SetCachePath(cachePath);
-            _config.SetUseGpuRenderer(false);
-            _config.SetEnableImages(true);
-            _config.SetEnableJavaScript(true);
+            Browser.Initialize(resourcePath, cachePath);
 
             _wikiTab = new WindowTab("Wiki", new AsyncTexture2D());
-            GameService.Overlay.BlishHudWindow.AddTab(_wikiTab, () => new WikiView(_config));
+            GameService.Overlay.BlishHudWindow.AddTab(_wikiTab, () => new WikiView());
         }
 
         protected override Task LoadAsync()
@@ -91,7 +58,6 @@ namespace WikiModule
         protected override void Unload()
         {
             GameService.Overlay.BlishHudWindow.RemoveTab(_wikiTab);
-            _config.Dispose();
         }
     }
 }

@@ -1,13 +1,9 @@
 ﻿using Blish_HUD;
 using Blish_HUD.Controls;
 using Blish_HUD.Input;
-using ImpromptuNinjas.UltralightSharp.Enums;
-using ImpromptuNinjas.UltralightSharp.Safe;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Runtime.InteropServices;
-using MouseEventType = ImpromptuNinjas.UltralightSharp.Enums.MouseEventType;
 
 namespace WikiModule
 {
@@ -16,17 +12,17 @@ namespace WikiModule
         private static readonly MouseHandler Mouse = GameService.Input.Mouse;
         private static readonly KeyboardHandler Keyboard = GameService.Input.Keyboard;
 
-        public string Url { get; set; }
-        public Config Config { get; set; }
-
-        private bool _initialized;
-        private Renderer _renderer;
-        private View _view;
+        private Browser _browser;
         private int[] _pixels;
         private Texture2D _texture;
 
         public BrowserControl()
         {
+            Graphics.QueueMainThreadRender(graphicsDevice =>
+            {
+                _browser = new Browser();
+            });
+
             Mouse.LeftMouseButtonPressed += OnLeftMouseButtonPressed;
             Mouse.LeftMouseButtonReleased += OnLeftMouseButtonReleased;
             Mouse.MouseMoved += OnMouseMoved;
@@ -35,22 +31,84 @@ namespace WikiModule
             Keyboard.KeyReleased += OnKeyReleased;
         }
 
+        public void LoadUrl(string url)
+        {
+            Graphics.QueueMainThreadRender(graphicsDevice =>
+            {
+                _browser.LoadUrl(url);
+                _browser.Focus();
+            });
+        }
+
+        protected override void OnResized(ResizedEventArgs e)
+        {
+            Graphics.QueueMainThreadRender(graphicsDevice =>
+            {
+                _browser.Resize(Width, Height);
+                _pixels = new int[Width * Height];
+                _texture?.Dispose();
+                _texture = new Texture2D(graphicsDevice, Width, Height, false, SurfaceFormat.Bgra32);
+            });
+
+            base.OnResized(e);
+        }
+
+        protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
+        {
+            // Resources may not have been initialized yet
+            if (_browser == null || _pixels == null || _texture == null)
+            {
+                return;
+            }
+
+            _browser.Update();
+            _browser.Render();
+
+            _browser.LockPixelsIfDirty(pixels =>
+            {
+                // Texture2D has no API for copying data directly from unmanaged memory
+                Marshal.Copy(pixels, _pixels, 0, _pixels.Length);
+                _texture.SetData(_pixels);
+            });
+
+            spriteBatch.DrawOnCtrl(this, _texture, bounds);
+        }
+
+        protected override void DisposeControl()
+        {
+            _texture?.Dispose();
+
+            Graphics.QueueMainThreadRender(graphicsDevice =>
+            {
+                _browser.Dispose();
+            });
+
+            Mouse.LeftMouseButtonPressed -= OnLeftMouseButtonPressed;
+            Mouse.LeftMouseButtonReleased -= OnLeftMouseButtonReleased;
+            Mouse.MouseMoved -= OnMouseMoved;
+            Mouse.MouseWheelScrolled -= OnMouseWheelScrolled;
+            Keyboard.KeyPressed -= OnKeyPressed;
+            Keyboard.KeyReleased -= OnKeyReleased;
+
+            base.DisposeControl();
+        }
+
         private void OnLeftMouseButtonPressed(object sender, MouseEventArgs e)
         {
             var mousePosition = Mouse.Position - AbsoluteBounds.Location;
-            _view?.FireMouseEvent(new MouseEvent(MouseEventType.MouseDown, mousePosition.X, mousePosition.Y, MouseButton.Left));
+            _browser?.FireMouseDownEvent(mousePosition.X, mousePosition.Y);
         }
 
         private void OnLeftMouseButtonReleased(object sender, MouseEventArgs e)
         {
             var mousePosition = Mouse.Position - AbsoluteBounds.Location;
-            _view?.FireMouseEvent(new MouseEvent(MouseEventType.MouseUp, mousePosition.X, mousePosition.Y, MouseButton.Left));
+            _browser?.FireMouseUpEvent(mousePosition.X, mousePosition.Y);
         }
 
         private void OnMouseMoved(object sender, MouseEventArgs e)
         {
             var mousePosition = Mouse.Position - AbsoluteBounds.Location;
-            _view?.FireMouseEvent(new MouseEvent(MouseEventType.MouseMoved, mousePosition.X, mousePosition.Y, MouseButton.None));
+            _browser?.FireMouseMovedEvent(mousePosition.X, mousePosition.Y);
         }
 
         private void OnMouseWheelScrolled(object sender, MouseEventArgs e)
@@ -62,69 +120,17 @@ namespace WikiModule
 
             var deltaX = Mouse.State.HorizontalScrollWheelValue;
             var deltaY = Mouse.State.ScrollWheelValue;
-            _view?.FireScrollEvent(new ScrollEvent(ScrollEventType.ScrollByPixel, deltaX, deltaY));
+            _browser?.FireScrollEvent(deltaX, deltaY);
         }
 
         private void OnKeyPressed(object sender, KeyboardEventArgs e)
         {
-            _view?.FireKeyEvent(new KeyEvent(KeyEventType.RawKeyDown, (UIntPtr)e.Key, IntPtr.Zero, false));
-            _view?.FireKeyEvent(new KeyEvent(KeyEventType.Char, (UIntPtr)e.Key.ToChar(), IntPtr.Zero, false));
+            _browser.FireKeyDownEvent((uint)e.Key);
         }
-
+        
         private void OnKeyReleased(object sender, KeyboardEventArgs e)
         {
-            _view?.FireKeyEvent(new KeyEvent(KeyEventType.KeyUp, (UIntPtr)e.Key, IntPtr.Zero, false));
-        }
-
-        protected override void Paint(SpriteBatch spriteBatch, Rectangle bounds)
-        {
-            if (!_initialized)
-            {
-                _renderer = new Renderer(Config);
-                _view = new View(_renderer, (uint)bounds.Width, (uint)bounds.Height, false, new Session(null));
-                _view.LoadUrl(Url);
-                _view.Focus();
-                _pixels = new int[bounds.Width * bounds.Height];
-                _texture = new Texture2D(spriteBatch.GraphicsDevice, bounds.Width, bounds.Height, false, SurfaceFormat.Bgra32);
-                _initialized = true;
-            }
-
-            _renderer.Update();
-            _renderer.Render();
-
-            var surface = _view.GetSurface();
-
-            if (!surface.GetDirtyBounds().IsEmpty())
-            {
-                var bitmap = surface.GetBitmap();
-                var pixels = bitmap.LockPixels();
-                Marshal.Copy(pixels, _pixels, 0, _pixels.Length);
-                bitmap.UnlockPixels();
-                _texture.SetData(_pixels);
-                surface.ClearDirtyBounds();
-            }
-
-            spriteBatch.DrawOnCtrl(this, _texture, bounds);
-        }
-
-        protected override void DisposeControl()
-        {
-            if (_initialized)
-            {
-                _texture.Dispose();
-                _view.Dispose();
-                _renderer.Dispose();
-                _initialized = false;
-            }
-
-            Mouse.LeftMouseButtonPressed -= OnLeftMouseButtonPressed;
-            Mouse.LeftMouseButtonReleased -= OnLeftMouseButtonReleased;
-            Mouse.MouseMoved -= OnMouseMoved;
-            Mouse.MouseWheelScrolled -= OnMouseWheelScrolled;
-            Keyboard.KeyPressed -= OnKeyPressed;
-            Keyboard.KeyReleased -= OnKeyReleased;
-
-            base.DisposeControl();
+            _browser.FireKeyUpEvent((uint)e.Key);
         }
     }
 }

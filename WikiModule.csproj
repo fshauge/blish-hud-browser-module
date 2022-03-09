@@ -66,10 +66,11 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Browser.cs" />
     <Compile Include="WikiModule.cs" />
     <Compile Include="BrowserControl.cs" />
     <Compile Include="WikiView.cs" />
-    <Compile Include="KeysExtensions.cs" />
+    <Compile Include="Keyboard.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AsyncClipboardService, Version=1.7.1.0, Culture=neutral, processorArchitecture=MSIL">
@@ -253,12 +254,15 @@
     </Reference>
     <Reference Include="UltralightSharp.Core.LinuxX64, Version=1.2.0.0, Culture=neutral, PublicKeyToken=72f7339aa8803655, processorArchitecture=AMD64">
       <HintPath>packages\ImpromptuNinjas.UltralightSharp.Core.LinuxX64.1.2.0-beta-r11\lib\netstandard2.0\UltralightSharp.Core.LinuxX64.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UltralightSharp.Core.OsxX64, Version=1.2.0.0, Culture=neutral, PublicKeyToken=72f7339aa8803655, processorArchitecture=AMD64">
       <HintPath>packages\ImpromptuNinjas.UltralightSharp.Core.OsxX64.1.2.0-beta-r11\lib\netstandard2.0\UltralightSharp.Core.OsxX64.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="UltralightSharp.Core.WinX64, Version=1.2.0.0, Culture=neutral, PublicKeyToken=72f7339aa8803655, processorArchitecture=AMD64">
       <HintPath>packages\ImpromptuNinjas.UltralightSharp.Core.WinX64.1.2.0-beta-r11\lib\net45\UltralightSharp.Core.WinX64.dll</HintPath>
+      <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
