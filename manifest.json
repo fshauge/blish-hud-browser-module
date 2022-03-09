@@ -5,7 +5,7 @@
     "package": "WikiModule.dll",
     "manifest_version": 1,
 
-    "description": "Description of your module. Visit https://github.com/blish-hud/manifest.json/blob/master/manifest-v1.md for details about the manifest format.",
+    "description": "Gives you access to the official Guild Wars 2 Wiki from within Blish HUD.",
     "dependencies": {
         "bh.blishhud": ">=0.5.2"
     },
