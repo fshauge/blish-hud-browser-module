@@ -37,7 +37,7 @@ namespace WikiModule
 
             Browser.Initialize(resourcePath, cachePath);
 
-            _wikiTab = new WindowTab("Wiki", new AsyncTexture2D());
+            _wikiTab = new WindowTab("Wiki", ContentsManager.GetTexture("748852463700017253.png"));
             GameService.Overlay.BlishHudWindow.AddTab(_wikiTab, () => new WikiView());
         }
 
