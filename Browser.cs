@@ -81,6 +81,11 @@ namespace WikiModule
             _view.Focus();
         }
 
+        public void Unfocus()
+        {
+            _view.Unfocus();
+        }
+
         public void FireMouseDownEvent(int x, int y)
         {
             _view.FireMouseEvent(new MouseEvent(MouseEventType.MouseDown, x, y, MouseButton.Left));

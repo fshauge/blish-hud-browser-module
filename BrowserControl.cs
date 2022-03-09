@@ -3,6 +3,7 @@ using Blish_HUD.Controls;
 using Blish_HUD.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Runtime.InteropServices;
 
 namespace WikiModule
@@ -15,6 +16,7 @@ namespace WikiModule
         private Browser _browser;
         private int[] _pixels;
         private Texture2D _texture;
+        private bool _focused;
 
         public BrowserControl()
         {
@@ -38,6 +40,28 @@ namespace WikiModule
                 _browser.LoadUrl(url);
                 _browser.Focus();
             });
+        }
+
+        public void Focus()
+        {
+            Graphics.QueueMainThreadRender(graphicsDevice =>
+            {
+                _browser.Focus();
+            });
+
+            Keyboard.SetTextInputListner(OnTextInput);
+            _focused = true;
+        }
+
+        public void Unfocus()
+        {
+            Graphics.QueueMainThreadRender(graphicsDevice =>
+            {
+                _browser.Unfocus();
+            });
+
+            Keyboard.UnsetTextInputListner(OnTextInput);
+            _focused = false;
         }
 
         protected override void OnResized(ResizedEventArgs e)
@@ -95,18 +119,42 @@ namespace WikiModule
 
         private void OnLeftMouseButtonPressed(object sender, MouseEventArgs e)
         {
+            if (_mouseOver && _enabled)
+            {
+                Focus();
+            }
+            else
+            {
+                Unfocus();
+            }
+
+            if (!_focused)
+            {
+                return;
+            }
+
             var mousePosition = Mouse.Position - AbsoluteBounds.Location;
             _browser?.FireMouseDownEvent(mousePosition.X, mousePosition.Y);
         }
 
         private void OnLeftMouseButtonReleased(object sender, MouseEventArgs e)
         {
+            if (!_focused)
+            {
+                return;
+            }
+
             var mousePosition = Mouse.Position - AbsoluteBounds.Location;
             _browser?.FireMouseUpEvent(mousePosition.X, mousePosition.Y);
         }
 
         private void OnMouseMoved(object sender, MouseEventArgs e)
         {
+            if (!_focused)
+            {
+                return;
+            }
+
             var mousePosition = Mouse.Position - AbsoluteBounds.Location;
             _browser?.FireMouseMovedEvent(mousePosition.X, mousePosition.Y);
         }
@@ -125,12 +173,27 @@ namespace WikiModule
 
         private void OnKeyPressed(object sender, KeyboardEventArgs e)
         {
+            if (!_focused)
+            {
+                return;
+            }
+
             _browser.FireKeyDownEvent((uint)e.Key);
         }
         
         private void OnKeyReleased(object sender, KeyboardEventArgs e)
         {
+            if (!_focused)
+            {
+                return;
+            }
+
             _browser.FireKeyUpEvent((uint)e.Key);
+        }
+
+        private void OnTextInput(string input)
+        {
+            // We don't actually care about the input
         }
     }
 }
